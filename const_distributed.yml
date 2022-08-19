@@ -1,0 +1,39 @@
+name: fcos_coco_distributed
+hyperparameters:
+    # These settings match that for the 150 epoch run provided in the original repo:
+    #   https://github.com/facebookresearch/detr
+    lr: 0.01
+    momentum: 0.9
+    global_batch_size: 16
+    weight_decay: 1.0e-4
+    gamma: 0.1
+
+    # Dataset
+    dataset_file: coco
+    backend: aws # specifiy the backend you want to use.  one of: gcs, aws, fake, local
+    data_dir: determined-ai-coco-dataset # bucket name if using gcs or aws, otherwise directory to dataset
+    masks: false
+    num_workers: 4
+
+    device: cpu
+
+bind_mounts:
+    - host_path: /tmp
+      container_path: /data
+      read_only: false
+
+min_validation_period:
+    # epochs: 1
+    batches: 2
+records_per_epoch: 117264
+searcher:
+  name: single
+  metric: loss
+  smaller_is_better: true
+  max_length:
+      batches: 4
+resources:
+    slots_per_trial: 1
+    shm_size: 2000000000
+max_restarts: 0
+entrypoint: model_def:ObjectDetectionTrial
